@@ -10,9 +10,7 @@
   const router = useRouter()
   const quizId = parseInt(route.params.id)
   const currentQuestion = ref(1)
-  const correctAnswered = ref(0)
   let quiz;
-  const quizRef = ref({})
   const submittedQuestion = computed(() => (currentQuestion.value) === quiz.questions.length)
   const questionStatus = computed(() => `${currentQuestion.value}/${quiz.questions.length}`)
   const questionBar = computed(() => `${(currentQuestion.value/quiz.questions.length)*100}%`)
@@ -29,20 +27,15 @@
   })
 
   onBeforeMount(() => {
-    quiz = quizData.find(q => q.id === quizId)
-    // quiz.questions = quiz.questions.map(q => {return {...q, isSelected: false}})
-    console.log("onBeforeMount", quiz);
-  })
-
-  onMounted(() => {
-    quizRef.value = quiz
-    quizRef.value.questions = quizRef.value.questions.map(q => {
+    var tempQuiz = quizData.find(q => q.id === quizId)
+    tempQuiz.questions = tempQuiz.questions.map(q => {
       var tempOptions = q.options.map(o => {
         return {...o, isSelected: false}
       })
       return {...q, options: tempOptions}
     })
-    console.log("onMounted", quizRef);
+    quiz = tempQuiz
+    console.log("onBeforeMount", quiz);
   })
 
   const onNext = () => {
@@ -60,13 +53,12 @@
     }
   }
 
-  const onSelectedAnswer = (questionId, optionId) => {
-    quizRef.value.questions[questionId].options = quizRef.value.questions[questionId].options.map(option => {
-      if (option.id === optionId) return {...option, isSelected: true}
-      return {...option, isSelected: false}
-    })
+  const onSelectedAnswer = (options) => {
+    quiz.questions[currentQuestion.value-1].options = options
+  }
 
-    console.log(`question: ${questionId} selected answer ${optionId}`);
+  const onSubmit = () => {
+    // TODO: count questions that have aswered correctly and navigate to result view
   }
 
 </script>
@@ -84,12 +76,10 @@
         :key="quiz.questions[currentQuestion-1].id" 
         :question="quiz.questions[currentQuestion-1]" @selected-answer="onSelectedAnswer" />
     </div>
-    <div class="nav-question" :style="{justifyContent: navJustify}" v-if="!submittedQuestion">
+    <div class="nav-question" :style="{justifyContent: navJustify}">
       <Button @click="onBack()" v-show="navQuestion.back" text="Back Question"></Button>
-      <Button @click="onNext()" v-show="navQuestion.next" text="Next Question"></Button>
-    </div>
-    <div class="nav-finish" v-else>
-      <Button @click="onBack()" v-show="navQuestion.back" text="Submit Answers"></Button>
+      <Button @click="onSubmit()" v-show="navQuestion.back" text="Submit Answers" v-if="submittedQuestion"></Button>
+      <Button @click="onNext()" v-show="navQuestion.next" text="Next Question" v-else></Button>
     </div>
   </div>
 </template>

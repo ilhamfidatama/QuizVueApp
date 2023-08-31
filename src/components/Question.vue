@@ -1,18 +1,29 @@
 <script setup>
-  import { ref, onBeforeMount } from "vue"
+  import { ref, onBeforeMount, watch } from "vue"
 
   const {question} = defineProps(["question"])
-  const emit = defineEmits(["selectedAnswer"])
-
+  const emit = defineEmits(["selected-answer"])
+  
+  const optionRef = ref([])
+  const optionIdSelected = ref(0)
 
   const onSelectedAnswer = (optionId) => {
-    emit("selectedAnswer", [question.id, optionId])
-    console.log(options.value);
+    optionIdSelected.value = optionId
   }
 
-  // onBeforeMount(() => {
-  //   option.value = 
-  // })
+  watch(optionIdSelected, () => {
+    optionRef.value = question.options.map(option => {
+      option.isSelected = option.id === optionIdSelected.value
+      return option
+    })
+    emit("selected-answer", optionRef.value)
+    console.log(optionRef);
+  })
+
+  onBeforeMount(() => {
+    optionRef.value = question.options
+  })
+
 </script>
 
 <template>
@@ -23,8 +34,7 @@
       </h1>
     </div>
     <div class="answer-container">
-      {{ question }}
-      <div class="option" v-for="option in question.options" :key="option.id" 
+      <div class="option" v-for="option in optionRef" :key="option.id" 
       @click="onSelectedAnswer(option.id)">
         <p class="option-label" v-bind:style="option.isSelected ? 'background-color:#499F68; color:white'
         : 'background-color:bisque'">{{ option.label }}</p>
