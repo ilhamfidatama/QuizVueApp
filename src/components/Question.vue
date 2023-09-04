@@ -17,7 +17,6 @@
       return option
     })
     emit("selected-answer", optionRef.value)
-    console.log(optionRef);
   })
 
   onBeforeMount(() => {

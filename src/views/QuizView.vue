@@ -4,7 +4,6 @@
   import quizData from "../../data.json";
   import Question from "../components/Question.vue";
   import Button from "../components/Button.vue";
-  import QuizResult from "../components/QuizResult.vue";
 
   const route = useRoute()
   const router = useRouter()
@@ -39,9 +38,6 @@
   })
 
   const onNext = () => {
-    if (currentQuestion.value === quiz.questions.length) {
-      console.log("show results component");
-    }
     if (currentQuestion.value < quiz.questions.length) {
       currentQuestion.value++
     }
@@ -59,6 +55,15 @@
 
   const onSubmit = () => {
     // TODO: count questions that have aswered correctly and navigate to result view
+    var correctAnswered = quiz.questions.filter(question => {
+      var optionCorrect = question.options.filter(option => option.isSelected && option.isCorrect)
+      return optionCorrect.length > 0
+    }).length
+    var result = {
+      correctAnswered: correctAnswered,
+      totalQuestions: quiz.questions.length
+    }
+    router.push({name: "results", params: {data: JSON.stringify(result)}})
   }
 
 </script>
